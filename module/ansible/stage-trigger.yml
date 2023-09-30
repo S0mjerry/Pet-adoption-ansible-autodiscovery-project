@@ -1,0 +1,13 @@
+---
+ - hosts: localhost
+   vars_files:
+     - /etc/ansible/password.yml
+   gather_facts: false
+
+   tasks:
+    - name: try
+      ansible.builtin.expect:
+       command: ansible-playbook -i /etc/ansible/stage-hosts /etc/ansible/stage-playbook.yml --ask-vault-pass
+       responses:
+         Vault password: \"{{vault_pass}}\"
+       timeout: 600

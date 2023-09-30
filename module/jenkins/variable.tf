@@ -1,0 +1,9 @@
+variable "ec2_ami" {}
+variable "instance_type" {}
+variable "subnet_id" {}
+variable "key_name" {}
+variable "security_groups" {}
+variable "nexus-ip" {}
+variable "tag-jenkins" {}
+variable "jenkins-elb" {}
+variable "subnet-id" {}

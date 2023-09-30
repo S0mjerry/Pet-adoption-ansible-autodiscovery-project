@@ -1,0 +1,13 @@
+---
+ - hosts: localhost
+   vars_files:
+     - /etc/ansible/password.yml
+   gather_facts: false
+
+   tasks:
+    - name: try
+      ansible.builtin.expect:
+       command: ansible-playbook -i /etc/ansible/prod-hosts /etc/ansible/prod-playbook.yml --ask-vault-pass
+       responses:
+         Vault password: \"{{vault_pass}}\"
+       timeout: 600
