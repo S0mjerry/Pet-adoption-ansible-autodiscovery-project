@@ -160,16 +160,16 @@ module "sonarqube" {
   tag-sonarqube-server = "${local.name}-sonarqube-server"
 }
 
-# module "RDS" {
-#   source                   = "./module/RDS"
-#   db_identifier            = "et2pacaad-db"
-#   security_groups          = module.vpc.rds-sg
-#   db-name                  = "ET2PACAAD_db"
-#   db-username              = "admin" #data.vault_generic_secret.db_secret.data["username"]
-#   db-password              = "admin123" #data.vault_generic_secret.db_secret.data["password"]
-#   subnet_ids               = [module.vpc.private-subnet1, module.vpc.private-subnet2]
-#   tag-db_subnet_group_name = "${local.name}-db-subnet-group"
-# }
+module "RDS" {
+  source                   = "./module/RDS"
+  db_identifier            = "et2pacaad-db"
+  security_groups          = module.vpc.rds-sg
+  db-name                  = "ET2PACAAD_db"
+  db-username              = "admin" #data.vault_generic_secret.db_secret.data["username"]
+  db-password              = "admin123" #data.vault_generic_secret.db_secret.data["password"]
+  subnet_ids               = [module.vpc.private-subnet1, module.vpc.private-subnet2]
+  tag-db_subnet_group_name = "${local.name}-db-subnet-group"
+}
 
 module "route53" {
   source            = "./module/route53"

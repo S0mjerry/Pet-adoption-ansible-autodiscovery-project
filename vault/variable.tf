@@ -2,7 +2,7 @@ variable "aws_region" {
   default = "eu-west-3"
 }
 variable "profile" {
-  default = "Groupaccess"
+  default = "Devgroup"
 }
 variable "public_keypair_path" {
   default = "~/keypair/ET2PACAAD.pub"
@@ -14,14 +14,14 @@ variable "instance_type" {
   default = "t3.medium"
 }
 variable "domain_name" {
-  default = "sophieplace.com"
+  default = "jerry-nwaogbogu.com"
 }
 variable "email" {
-  default = "amibaby104@gmail.com"
+  default = "jerry.ogbogu@gmail.com"
 }
 variable "api_key" {
-  default = "NRAK-9D4ZJK6FA2133JZT3QZN0QHW3HT"
+  default = "NRAK-BG9JS0ABQS0C3VWQZNG2GYVYLSC"
 }
 variable "account_id" {
-  default = "4092682"
+  default = "4092157"
 }
