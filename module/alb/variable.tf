@@ -6,3 +6,4 @@ variable "tag-prod-alb" {}
 variable "http_port" {}
 variable "https_port" {}
 variable "certificate_arn" {}
+variable "tag-stage-alb" {}

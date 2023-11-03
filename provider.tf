@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 provider "vault" {
-  token   = "s.Kth3OjIYvXnN9Xvx26ml7gPm"
+  token   = "s.EoseKByJDFTaLSYMXFm9ZDpd"
   address = "https://jerry-nwaogbogu.com"
 }
 

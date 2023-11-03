@@ -10,14 +10,14 @@ inventoryUpdate() {
         echo "[webservers]" > /etc/ansible/stage-hosts
         for instance in \`cat /etc/ansible/stage-ips.list\`
         do
-                ssh-keyscan -H \$instance >> -/ .ssh/known_hosts
-echo "\$instance ansible_user-ec2-user ansible_ssh_private_key_file=/etc/ansible/key.pem" >> /etc/ansible/stage-hosts
+                ssh-keyscan -H \$instance >> ~/ .ssh/known_hosts
+echo "\$instance ansible_user=ec2-user ansible_ssh_private_key_file=/etc/ansible/key.pem" >> /etc/ansible/stage-hosts
        done
 }
 instanceUpdate() {
-    sleep
-    ansible-playbook /etc/ansible/stage-trigger.yml --extra-vars "ansible_python_interpreter=/usr/bin/python3.9"
-    sleep 30
+sleep 10
+    ansible-playbook -i /etc/ansible/stage-hosts /etc/ansible/stage-playbook.yml 
+    sleep 10
 }
 
 awsDiscovery

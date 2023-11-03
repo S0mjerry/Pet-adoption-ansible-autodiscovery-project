@@ -13,11 +13,11 @@ output "sonarqube-ip" {
 output "bastion-ip" {
   value = module.bastion-host.bastion-host-ip
 }
-output "stage-high-availability" {
-  value = module.stage-high-availability.stage-alb-dns
+output "stage-alb" {
+  value = module.alb.stage-alb-dns
 }
-output "prod-high-availability" {
-  value = module.prod-high-availability.prod-lb-dns
+output "prod-alb" {
+  value = module.alb.prod-lb-dns
 }
 output "jenkins-dns" {
   value = module.jenkins.jenkins-dns

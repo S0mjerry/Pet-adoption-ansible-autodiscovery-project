@@ -1,5 +1,5 @@
 locals {
-  name = "ET2PACAAD"
+  name = "JERRY"
 }
 
 module "vpc" {
@@ -76,16 +76,14 @@ module "ansible" {
   prod-playbook      = "${path.root}/module/ansible/prod-playbook.yml"
   stage-bash-script  = "${path.root}/module/ansible/stage-bash-script.sh"
   prod-bash-script   = "${path.root}/module/ansible/prod-bash-script.sh"
-  stage-trigger      = "${path.root}/module/ansible/stage-trigger.yml"
-  prod-trigger       = "${path.root}/module/ansible/prod-trigger.yml"
-  password           = "${path.root}/module/ansible/password.yml"
   private-key        = file("~/keypair/ET2PACAAD")
   nexus-server-ip    = module.nexus.nexus-server-ip
 }
 
-module "asg-stage" {
-  source                 = "./module/asg-stage"
+module "asg" {
+  source                 = "./module/asg"
   stage-lt               = "${local.name}-stage-lt"
+  prod-lt                = "${local.name}-prod-lt"
   image_id               = "ami-0d767e966f3458eb5"
   instance_type          = "t2.medium"
   vpc_security_group_ids = module.vpc.docker-sg
@@ -94,50 +92,25 @@ module "asg-stage" {
   api_key                = "NRAK-BG9JS0ABQS0C3VWQZNG2GYVYLSC"
   account_id             = "4092157"
   stage-asg-name         = "${local.name}-stage-asg"
-  vpc-zone-identifier    = [module.vpc.private-subnet1, module.vpc.private-subnet2]
-  tg_arn                 = [module.stage-high-availability.stage-target-arn]
-  stage-asg-policy       = "${local.name}-asg-policy"
-}
-
-module "asg-prod" {
-  source                 = "./module/asg-prod"
-  prod-lt                = "${local.name}-prod-lt"
-  image_id               = "ami-0d767e966f3458eb5"
-  instance_type          = "t2.medium"
-  vpc_security_group_ids = module.vpc.docker-sg
-  key_name               = module.vpc.key-name
-  nexus-server-ip        = module.nexus.nexus-server-ip
-  api_key                = "NRAK-BG9JS0ABQS0C3VWQZNG2GYVYLSC"
   prod-asg-name          = "${local.name}-prod-asg"
   vpc-zone-identifier    = [module.vpc.private-subnet1, module.vpc.private-subnet2]
-  tg_arn                 = [module.prod-high-availability.prod-target-arn]
+  tg_arn_stage           = [module.alb.stage-target-arn]
+  tg_arn_prod            = [module.alb.prod-target-arn]
+  stage-asg-policy       = "${local.name}-asg-policy"
   prod-asg-policy        = "${local.name}-asg-policy"
-  account_id             = "4092157"
 }
 
-module "prod-high-availability" {
-  source             = "./module/prod-high-availability"
+module "alb" {
+  source             = "./module/alb"
   port_proxy         = "8080"
   vpc_id             = module.vpc.vpc-id
   security_group_ids = [module.vpc.docker-sg]
-  subnets            = [module.vpc.private-subnet1, module.vpc.private-subnet2]
+  subnets            = [module.vpc.public-subnet1, module.vpc.public-subnet2]
+  tag-stage-alb      = "${local.name}-stage-alb"
   tag-prod-alb       = "${local.name}-prod-alb"
   http_port          = "80"
   https_port         = "443"
-  certificate_arn    = module.ssl.certificate_arn
-}
-
-module "stage-high-availability" {
-  source             = "./module/stage-high-availability"
-  port_proxy         = "8080"
-  vpc_id             = module.vpc.vpc-id
-  security_group_ids = [module.vpc.docker-sg]
-  subnets            = [module.vpc.private-subnet1, module.vpc.private-subnet2]
-  tag-stage-alb      = "${local.name}-stage-alb"
-  http_port          = "80"
-  https_port         = "443"
-  certificate_arn    = module.ssl.certificate_arn
-
+  certificate_arn    = module.route53.certificate_arn
 }
 
 module "nexus" {
@@ -165,8 +138,8 @@ module "RDS" {
   db_identifier            = "et2pacaad-db"
   security_groups          = module.vpc.rds-sg
   db-name                  = "ET2PACAAD_db"
-  db-username              = "admin" #data.vault_generic_secret.db_secret.data["username"]
-  db-password              = "admin123" #data.vault_generic_secret.db_secret.data["password"]
+  db-username              = data.vault_generic_secret.db_secret.data["username"]
+  db-password              = data.vault_generic_secret.db_secret.data["password"]
   subnet_ids               = [module.vpc.private-subnet1, module.vpc.private-subnet2]
   tag-db_subnet_group_name = "${local.name}-db-subnet-group"
 }
@@ -175,15 +148,11 @@ module "route53" {
   source            = "./module/route53"
   domain-name       = "jerry-nwaogbogu.com"
   domain-name1      = "stage.jerry-nwaogbogu.com"
-  stage_lb_dns_name = module.stage-high-availability.stage-alb-dns
-  stage_lb_zoneid   = module.stage-high-availability.stage-alb-zone-id
+  domain-name3      = "*.jerry-nwaogbogu.com"
+  stage_lb_dns_name = module.alb.stage-alb-dns
+  stage_lb_zoneid   = module.alb.stage-alb-zone-id
   domain-name2      = "prod.jerry-nwaogbogu.com"
-  prod_lb_dns_name  = module.prod-high-availability.prod-lb-dns
-  prod_lb_zoneid    = module.prod-high-availability.prod-lb-zone-id
-}
-
-module "ssl" {
-  source       = "./module/ssl"
-  domain_name  = "jerry-nwaogbogu.com"
-  domain_name2 = "*.jerry-nwaogbogu.com"
+  prod_lb_dns_name  = module.alb.prod-lb-dns
+  prod_lb_zoneid    = module.alb.prod-lb-zone-id
+  
 }
